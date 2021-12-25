@@ -69,3 +69,17 @@ func AddConsumer(ctx context.Context, client *redis.Client, group string, handle
 		u.Green.Println("(4/4)", u.Time().DateTime(), task.Id, "completed ...")
 	}
 }
+
+// Logo logo chars
+func Logo() string {
+	logoChars := `
+       _           _                             
+      | |         (_)       _                    
+  ____| |__   ____ _  ___ _| |_ ____  _____  ___ 
+ / ___)  _ \ / ___) |/___|_   _)    \(____ |/___)
+( (___| | | | |   | |___ | | |_| | | / ___ |___ |
+ \____)_| |_|_|   |_(___/   \__)_|_|_\_____(___/ 
+                                                 
+`
+	return logoChars
+}
