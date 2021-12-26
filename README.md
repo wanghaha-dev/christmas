@@ -3,5 +3,5 @@
 
 #### 安装
 ```
-go get -u wanghaha-dev/christmas
+go get -u github.com/wanghaha-dev/christmas
 ```
