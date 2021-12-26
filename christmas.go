@@ -46,7 +46,7 @@ func QueryTask(ctx context.Context, client *redis.Client, taskId string) *Task {
 // AddConsumer add consumer
 func AddConsumer(ctx context.Context, client *redis.Client, group string, handle func(t *Task)) {
 	for {
-		u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().DateTime(), "Waiting to work ...")
+		u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().DateTime(), "Total tasks: ", client.LLen(ctx, group + "_untreated") ,"Waiting to work ...")
 		getTask := client.BRPop(ctx, 0, group+"_untreated")
 		var task Task
 		json.Unmarshal([]byte(getTask.Val()[1]), &task)
