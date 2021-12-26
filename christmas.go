@@ -3,6 +3,7 @@ package christmas
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/wanghaha-dev/u"
 	"sync"
@@ -46,7 +47,8 @@ func QueryTask(ctx context.Context, client *redis.Client, taskId string) *Task {
 // AddConsumer add consumer
 func AddConsumer(ctx context.Context, client *redis.Client, group string, handle func(t *Task)) {
 	for {
-		u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().DateTime(), "Total tasks: ", client.LLen(ctx, group + "_untreated").Val() ,"Waiting to work ...")
+		groupTasks := fmt.Sprintf("%v total tasks: ", client.LLen(ctx, group + "_untreated").Val() )
+		u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().DateTime(), groupTasks ," Waiting to work ...")
 		getTask := client.BRPop(ctx, 0, group+"_untreated")
 		var task Task
 		json.Unmarshal([]byte(getTask.Val()[1]), &task)
