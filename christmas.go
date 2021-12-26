@@ -48,7 +48,7 @@ func QueryTask(ctx context.Context, client *redis.Client, taskId string) *Task {
 func AddConsumer(ctx context.Context, client *redis.Client, group string, handle func(t *Task)) {
 	for {
 		tasksCount := client.LLen(ctx, group + "_untreated").Val()
-		groupTasks := fmt.Sprintf("[ %v ] total tasks: %v", group,   )
+		groupTasks := fmt.Sprintf("[ %v ] total tasks: %v", group, tasksCount)
 		if tasksCount == 0 {
 			u.NewColor(u.FgLightWhite, u.BgGreen).Println(u.Time().DateTime(), groupTasks ," Waiting to work ...")
 		} else {
