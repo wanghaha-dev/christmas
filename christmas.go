@@ -29,15 +29,32 @@ func New() *Task {
 	return _task
 }
 
+var _client *redis.Client
+var _clientOnce sync.Once
+// Connect 连接
+func (receiver *Task) Connect(Addr string, Password string, DB int) *redis.Client {
+	_clientOnce.Do(func() {
+		if Addr == "" {
+			Addr = "localhost:6379"
+		}
+		_client = redis.NewClient(&redis.Options{
+			Addr:     Addr,
+			Password: Password, // no password set
+			DB:       DB,  // use default DB
+		})
+	})
+	return _client
+}
+
 // AddTask add task
-func AddTask(ctx context.Context, client *redis.Client, group string, task *Task) string {
+func (receiver *Task)AddTask(ctx context.Context, client *redis.Client, group string, task *Task) string {
 	jsonData, _ := json.Marshal(task)
 	client.LPush(ctx, group+"_untreated", jsonData)
 	return task.Id
 }
 
 // QueryTask query task
-func QueryTask(ctx context.Context, client *redis.Client, taskId string) *Task {
+func (receiver *Task)QueryTask(ctx context.Context, client *redis.Client, taskId string) *Task {
 	taskData := client.HGet(ctx, "completed", taskId)
 	var task Task
 	json.Unmarshal([]byte(taskData.Val()), &task)
@@ -45,7 +62,7 @@ func QueryTask(ctx context.Context, client *redis.Client, taskId string) *Task {
 }
 
 // AddConsumer add consumer
-func AddConsumer(ctx context.Context, client *redis.Client, group string, handle func(t *Task)) {
+func (receiver *Task)AddConsumer(ctx context.Context, client *redis.Client, group string, handle func(t *Task)) {
 	for {
 		tasksCount := client.LLen(ctx, group + "_untreated").Val()
 		groupTasks := fmt.Sprintf("[ %v ] total tasks: %v", group, tasksCount)
