@@ -67,31 +67,31 @@ func (receiver *Task)AddConsumer(ctx context.Context, client *redis.Client, grou
 		tasksCount := client.LLen(ctx, group + "_untreated").Val()
 		groupTasks := fmt.Sprintf("[ %v ] total tasks: %v", group, tasksCount)
 		if tasksCount == 0 {
-			u.NewColor(u.FgLightWhite, u.BgGreen).Println(u.Time().DateTime(), groupTasks ," Waiting to work ...")
+			u.NewColor(u.FgLightWhite, u.BgGreen).Println(u.Time().Now().DateTime(), groupTasks ," Waiting to work ...")
 		} else {
-			u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().DateTime(), groupTasks ," Waiting to work ...")
+			u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().Now().DateTime(), groupTasks ," Waiting to work ...")
 		}
 
 		getTask := client.BRPop(ctx, 0, group+"_untreated")
 		var task Task
 		_ = json.Unmarshal([]byte(getTask.Val()[1]), &task)
-		task.ReadTime = u.Time().DateTime()
+		task.ReadTime = u.Time().Now().DateTime()
 
-		u.Blue.Println("(1/4)", u.Time().DateTime(), "read task ", task.Id, "...")
+		u.Blue.Println("(1/4)", u.Time().Now().DateTime(), "read task ", task.Id, "...")
 
 		// execute
-		u.Magenta.Println("(2/4)", u.Time().DateTime(), "execute task ", task.Id, "...")
+		u.Magenta.Println("(2/4)", u.Time().Now().DateTime(), "execute task ", task.Id, "...")
 		handle(&task)
 
 		// modify status
-		u.Cyan.Println("(3/4)", u.Time().DateTime(), "update task status", task.Id, "...")
-		task.CompleteTime = u.Time().DateTime()
+		u.Cyan.Println("(3/4)", u.Time().Now().DateTime(), "update task status", task.Id, "...")
+		task.CompleteTime = u.Time().Now().DateTime()
 		task.Status = 200
 
 		// Completed
 		completedTask, _ := json.Marshal(task)
 		client.HSet(ctx, "completed", task.Id, completedTask)
-		u.Green.Println("(4/4)", u.Time().DateTime(), task.Id, "completed ...")
+		u.Green.Println("(4/4)", u.Time().Now().DateTime(), task.Id, "completed ...")
 	}
 }
 
