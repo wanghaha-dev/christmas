@@ -47,9 +47,9 @@ func (receiver *Task) Connect(Addr string, Password string, DB int) *redis.Clien
 }
 
 // AddTask add task
-func (receiver *Task)AddTask(ctx context.Context, client *redis.Client, task *Task) string {
+func (receiver *Task)AddTask(ctx context.Context, client *redis.Client, group string, task *Task) string {
 	jsonData, _ := json.Marshal(task)
-	client.LPush(ctx, receiver.Group+"_untreated", jsonData)
+	client.LPush(ctx, group+"_untreated", jsonData)
 	return task.Id
 }
 
@@ -62,17 +62,17 @@ func (receiver *Task)QueryTask(ctx context.Context, client *redis.Client, taskId
 }
 
 // AddConsumer add consumer
-func (receiver *Task)AddConsumer(ctx context.Context, client *redis.Client, handle func(t *Task)) {
+func (receiver *Task)AddConsumer(ctx context.Context, client *redis.Client, group string, handle func(t *Task)) {
 	for {
-		tasksCount := client.LLen(ctx, receiver.Group + "_untreated").Val()
-		groupTasks := fmt.Sprintf("[ %v ] total tasks: %v", receiver.Group, tasksCount)
+		tasksCount := client.LLen(ctx, group + "_untreated").Val()
+		groupTasks := fmt.Sprintf("[ %v ] total tasks: %v", group, tasksCount)
 		if tasksCount == 0 {
 			u.NewColor(u.FgLightWhite, u.BgGreen).Println(u.Time().DateTime(), groupTasks ," Waiting to work ...")
 		} else {
 			u.NewColor(u.FgLightWhite, u.BgBlue).Println(u.Time().DateTime(), groupTasks ," Waiting to work ...")
 		}
 
-		getTask := client.BRPop(ctx, 0, receiver.Group +"_untreated")
+		getTask := client.BRPop(ctx, 0, group+"_untreated")
 		var task Task
 		_ = json.Unmarshal([]byte(getTask.Val()[1]), &task)
 		task.ReadTime = u.Time().DateTime()
